@@ -1,8 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+import { PersistGate } from 'redux-persist/integration/react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
-import App from './App';
+import store, { persistor, history } from './configureStore';
+import Screens from './screens';
 import * as serviceWorker from './serviceWorker';
 
 import theme from './theme';
@@ -11,7 +15,13 @@ ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <Router history={history}>
+            <Screens />
+          </Router>
+        </PersistGate>
+      </Provider>
     </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
