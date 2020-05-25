@@ -1,9 +1,20 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const userCtrl = require('../controllers/user');
+const ROLES = require('../constants');
+const policies = require('../policies');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const router = express.Router();
+
+router.use(policies.checkRoles([ROLES.ADMIN]));
+
+router.route('/').get(userCtrl.list).post(userCtrl.create);
+
+router
+  .route('/:userId')
+  .get(userCtrl.read)
+  .put(userCtrl.update)
+  .delete(userCtrl.remove);
+
+router.param('userId', userCtrl.getUserByID);
 
 module.exports = router;

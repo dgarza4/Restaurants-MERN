@@ -1,37 +1,39 @@
-var createError = require('http-errors');
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const config = require('./config');
+const APIError = require('./error');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const initializeDB = require('./mongoose');
 
-var app = express();
+initializeDB();
 
-// view engine setup
+const apiRouter = require('./routes');
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+const app = express();
+app.use(morgan('combined'));
+app.use(helmet({ frameguard: false }));
+app.use(bodyParser.json());
+app.use(cors());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', apiRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
+app.use((req, res, next) => {
+  next(new APIError('API not found', 404));
 });
 
-// error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.use((err, req, res, next1) => {
+  console.error(err);
+  res.status(err.status || 500).json({
+    message: err.message,
+    stack: config.isDev ? err.stack : undefined,
+  });
 });
 
-module.exports = app;
+app.listen(config.port, (err) => {
+  if (err) throw err;
+
+  console.log(`> Ready on http://localhost:${config.port}`);
+});
