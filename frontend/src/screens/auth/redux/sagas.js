@@ -6,6 +6,8 @@ import * as ACTIONS from './actions';
 import { request } from '../../../utils';
 import { history } from '../../../configureStore';
 
+import { enqueueSnackbar } from '../../../shared/Notifier/redux/actions';
+
 function* signup(action) {
   try {
     const data = yield call(request, '/auth/signup', 'POST', action.data);
@@ -14,6 +16,7 @@ function* signup(action) {
     history.push('/signin');
   } catch (err) {
     yield put(ACTIONS.signupError());
+    yield put(enqueueSnackbar(err.message, 'error'));
   }
 }
 
@@ -28,6 +31,7 @@ function* login(action) {
     yield put(ACTIONS.loginSuccess(data));
   } catch (err) {
     yield put(ACTIONS.loginError());
+    yield put(enqueueSnackbar(err.message, 'error'));
   }
 }
 
@@ -39,6 +43,7 @@ function* updateProfile(action) {
     yield put(ACTIONS.updateProfileSuccess(data));
   } catch (err) {
     yield put(ACTIONS.updateProfileError());
+    yield put(enqueueSnackbar(err.message, 'error'));
   }
 }
 

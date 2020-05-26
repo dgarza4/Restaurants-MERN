@@ -93,6 +93,7 @@ export default function SignIn() {
                 name="email"
                 type="email"
                 label="Email"
+                disabled={false}
               />
               <Field
                 variant="outlined"
@@ -104,6 +105,7 @@ export default function SignIn() {
                 type="password"
                 label="Password"
                 name="password"
+                disabled={false}
               />
               <Button
                 fullWidth

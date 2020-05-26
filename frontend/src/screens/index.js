@@ -6,6 +6,7 @@ import { SnackbarProvider } from 'notistack';
 import { Navbar } from '../shared';
 import AuthModule from './auth';
 import AppModule from './app';
+import { Notifier } from '../shared';
 
 export default () => {
   const { authUser } = useSelector((state) => state.auth);
@@ -18,6 +19,7 @@ export default () => {
         horizontal: 'center',
       }}
     >
+      <Notifier />
       <Navbar />
       <Container>{authUser ? <AppModule /> : <AuthModule />}</Container>
     </SnackbarProvider>
