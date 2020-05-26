@@ -7,7 +7,7 @@ const APIError = require('../error');
 async function create(req, res, next) {
   const { firstName, lastName, email, password } = req.body;
 
-  if ((!firstName, !lastName, !email, !password)) {
+  if (!firstName || !lastName || !email || !password) {
     return next(
       new APIError(
         'First name, last name, email or password field can not be empty',
@@ -33,14 +33,12 @@ async function create(req, res, next) {
     user.role = req.body.role;
   }
 
-  user
-    .save()
-    .then((newUser) => {
-      res.json(newUser);
-    })
-    .catch((err) => {
-      return next(new APIError(err.message, 500));
-    });
+  try {
+    const newUser = await user.save();
+    res.json(newUser);
+  } catch (err) {
+    return next(new APIError(err.message, 500));
+  }
 }
 
 async function update(req, res, next) {
@@ -81,7 +79,7 @@ function read(req, res) {
   res.json(req.userModel);
 }
 
-function list(req, res, next) {
+async function list(req, res, next) {
   const { filters, sorts, skip, limit } = req.query;
   const where = baseController.listWhere(filters || {});
 
@@ -93,27 +91,26 @@ function list(req, res, next) {
 
   const sort = baseController.listSort(sorts || []);
 
-  Promise.all([
-    User.find(where)
-      .sort(sort)
-      .skip(skip * 1 || 0)
-      .limit(limit * 1 || 20)
-      .lean(),
-    baseController.getCount(User, where),
-  ])
-    .then((results) => {
-      const [items, total] = results;
+  try {
+    const results = await Promise.all([
+      User.find(where)
+        .sort(sort)
+        .skip(skip * 1 || 0)
+        .limit(limit * 1 || 10)
+        .lean(),
+      baseController.getCount(User, where),
+    ]);
+    const [items, total] = results;
 
-      res.send({
-        skip: skip * 1 || 0,
-        limit: limit * 1 || 20,
-        total,
-        data: items,
-      });
-    })
-    .catch((err) => {
-      return next(new APIError(err.message, 500));
+    res.send({
+      skip: skip * 1 || 0,
+      limit: limit * 1 || 10,
+      total,
+      data: items,
     });
+  } catch (err) {
+    return next(new APIError(err.message, 500));
+  }
 }
 
 async function remove(req, res, next) {
@@ -130,17 +127,18 @@ async function remove(req, res, next) {
   }
 }
 
-function getUserByID(req, res, next, id) {
-  User.findById(id)
-    .then((user) => {
-      if (!user) {
-        return next(new APIError('User not found', 404));
-      }
+async function getUserByID(req, res, next, id) {
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return next(new APIError('User not found', 404));
+    }
 
-      req.userModel = user;
-      next();
-    })
-    .catch(next);
+    req.userModel = user;
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = {

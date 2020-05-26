@@ -1,9 +1,16 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const expressJwt = require('express-jwt');
+const config = require('../config');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+const authRoute = require('./auth');
+const userRoute = require('./users');
+const restaurantRoute = require('./restaurants');
+
+const router = express.Router();
+const authMiddleware = expressJwt({ secret: config.jwtSecret });
+
+router.use('/auth', authRoute);
+router.use('/users', authMiddleware, userRoute);
+router.use('/restaurants', authMiddleware, restaurantRoute);
 
 module.exports = router;

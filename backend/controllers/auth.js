@@ -3,50 +3,47 @@ const config = require('../config');
 const User = require('../models/user');
 const APIError = require('../error');
 
-function login(req, res, next) {
+async function login(req, res, next) {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return next(new APIError('Email or password can not be empty', 422));
   }
 
-  User.findOne({ email })
+  const user = await User.findOne({ email })
     .select('_id password email firstName lastName role')
-    .exec()
-    .then((user) => {
-      if (!user) {
-        return next(new APIError('User not found', 404));
-      }
+    .exec();
 
-      return user
-        .authenticate(req.body.password)
-        .then(() => {
-          const token = jwt.sign(
-            {
-              _id: user._id,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              role: user.role,
-            },
-            config.jwtSecret,
-            { expiresIn: config.jwtExpires }
-          );
+  if (!user) {
+    return next(new APIError('User not found', 404));
+  }
 
-          res.json({
-            _id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role: user.role,
-            token,
-          });
-        })
-        .catch(() => {
-          return next(new APIError('Incorrect password', 422));
-        });
-    })
-    .catch(next);
+  try {
+    await user.authenticate(req.body.password);
+  } catch (err) {
+    return next(new APIError('Incorrect password', 422));
+  }
+
+  const token = jwt.sign(
+    {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    },
+    config.jwtSecret,
+    { expiresIn: config.jwtExpires }
+  );
+
+  res.json({
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+    token,
+  });
 }
 
 async function signup(req, res, next) {
@@ -61,14 +58,12 @@ async function signup(req, res, next) {
     password: req.body.password,
   });
 
-  user
-    .save()
-    .then((newUser) => {
-      res.json(newUser);
-    })
-    .catch((err) => {
-      return next(new APIError(err.message, 500));
-    });
+  try {
+    const newUser = await user.save();
+    res.json(newUser);
+  } catch (err) {
+    return next(new APIError(err.message, 500));
+  }
 }
 
 module.exports = {
