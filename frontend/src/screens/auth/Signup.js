@@ -114,6 +114,7 @@ export default function SignUp() {
                     id="firstName"
                     label="First Name"
                     autoFocus
+                    disabled={false}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -126,6 +127,7 @@ export default function SignUp() {
                     label="Last Name"
                     name="lastName"
                     autoComplete="lname"
+                    disabled={false}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -138,6 +140,7 @@ export default function SignUp() {
                     label="Email Address"
                     name="email"
                     autoComplete="email"
+                    disabled={false}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -151,6 +154,7 @@ export default function SignUp() {
                     type="password"
                     id="password"
                     autoComplete="current-password"
+                    disabled={false}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -164,6 +168,7 @@ export default function SignUp() {
                     type="password"
                     id="confirm-password"
                     autoComplete="current-password"
+                    disabled={false}
                   />
                 </Grid>
               </Grid>
