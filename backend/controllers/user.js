@@ -4,17 +4,27 @@ const ROLES = require('../constants');
 const baseController = require('./base');
 const APIError = require('../error');
 
-async function create(req, res, next) {
-  const { firstName, lastName, email, password } = req.body;
-
-  if (!firstName || !lastName || !email || !password) {
-    return next(
-      new APIError(
-        'First name, last name, email or password field can not be empty',
-        422
-      )
-    );
+function validate({ firstName, lastName, email, password }, next) {
+  switch (true) {
+    case !firstName:
+      return next(new APIError('First name can not be empty', 422));
+    case !lastName:
+      return next(new APIError('Last name can not be empty', 422));
+    case !email:
+      return next(new APIError('Email can not be empty', 422));
+    case !password:
+      return next(new APIError('Password can not be empty', 422));
+    case !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email):
+      return next(new APIError('Email is not valid', 422));
+    default:
+      return true;
   }
+}
+
+async function create(req, res, next) {
+  const { email } = req.body;
+
+  validate(req.body, next);
 
   const existingUsers = await User.find({ email });
 
@@ -42,24 +52,19 @@ async function create(req, res, next) {
 }
 
 async function update(req, res, next) {
-  if (req.body.firstName) {
-    req.userModel.firstName = req.body.firstName;
-  }
+  const { firstName, lastName, email, password, role } = req.body;
 
-  if (req.body.lastName) {
-    req.userModel.lastName = req.body.lastName;
-  }
+  validate(req.body, next);
 
-  if (req.body.email) {
-    req.userModel.email = req.body.email;
-  }
+  Object.assign(req.userModel, {
+    firstName,
+    lastName,
+    email,
+    password,
+  });
 
-  if (req.body.password) {
-    req.userModel.password = req.body.password;
-  }
-
-  if (req.user.role === ROLES.ADMIN && req.body.role) {
-    req.userModel.role = req.body.role;
+  if (req.user.role === ROLES.ADMIN && role) {
+    req.userModel.role = role;
   }
 
   try {
