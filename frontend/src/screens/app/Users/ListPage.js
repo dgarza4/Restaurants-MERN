@@ -11,7 +11,7 @@ const columns = [
   {
     title: 'Password',
     field: 'password',
-    render: (rowData) => <div style={{ opacity: 0.5 }}>****</div>,
+    render: (rowData) => <div style={{ opacity: 0.5 }}>******</div>,
     filtering: false,
   },
   {
