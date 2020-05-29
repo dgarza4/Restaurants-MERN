@@ -7,6 +7,7 @@ import RestaurantsList from './Restaurants/ListPage';
 import UsersList from './Users/ListPage';
 import EditProfile from './EditProfile';
 import ResetPassword from './ResetPassword';
+import ReviewsList from './Reviews/ListPage';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -24,6 +25,7 @@ export default () => {
         {authUser.role === 'admin' && (
           <Route path="/users" component={UsersList} />
         )}
+        <Route path="/restaurants/:id" component={ReviewsList} />
         <Route path="/restaurants" component={RestaurantsList} />
         <Route path="/profile" component={EditProfile} />
         <Route path="/reset-password" component={ResetPassword} />
