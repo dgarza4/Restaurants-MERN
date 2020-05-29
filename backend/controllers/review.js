@@ -69,6 +69,9 @@ async function update(req, res, next) {
 
   try {
     const { restaurantId } = req.params;
+    delete req.review.user;
+    delete req.review.restaurant;
+
     const updatedReview = await req.review.save();
     const restaurant = await Restaurant.findById(restaurantId);
 
@@ -79,7 +82,10 @@ async function update(req, res, next) {
     restaurant.averageRate = averageRate;
 
     await restaurant.save();
-    res.json(updatedReview);
+    const populatedData = await Review.findById(updatedReview._id).populate(
+      'user restaurant'
+    );
+    res.json(populatedData);
   } catch (err) {
     return next(new APIError(err.message, 500));
   }
