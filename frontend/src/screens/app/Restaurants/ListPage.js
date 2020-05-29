@@ -1,103 +1,153 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { TablePagination, Slider, Box, Typography } from '@material-ui/core';
+import Rating from '@material-ui/lab/Rating';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import MaterialTable from 'material-table';
-import request from '../../../utils/apiRequest';
-import { enqueueSnackbar } from '../../../shared/Notifier/redux/actions';
 
-const columns = [
-  { title: 'Name', field: 'name' },
-  { title: 'Owner', field: 'owner' },
-];
+import useApiRequests from './useApiRequests';
 
 export default () => {
-  const [list, setList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch();
+  const history = useHistory();
+  const { authUser } = useSelector((state) => state.auth);
+  const [averageRateFilter, setAverageRateFilter] = useState([0, 5]);
+  const {
+    addNewRestaurant,
+    updateRestaurant,
+    deleteRestaurant,
+    usersList,
+    list,
+    total,
+    isLoading,
+    perPage,
+    setPerPage,
+    pageNum,
+    setPageNum,
+    setFilters,
+    setSorts,
+  } = useApiRequests();
 
-  const listRestaurants = async () => {
-    // const requestData = {
-    //   skip: action.payload.skip,
-    //   limit: action.payload.limit,
-    //   filters: action.payload.filters,
-    //   sorts: action.payload.sorts,
-    // };
-    const requestData = {};
-    try {
-      setIsLoading(true);
-      const { result } = await request(
-        '/restaurants',
-        'GET',
-        requestData,
-        true
-      );
-      setList(result);
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(enqueueSnackbar(err.message, 'error'));
-    }
+  const usersLookup = {};
+
+  usersList.forEach((user) => {
+    usersLookup[user._id] = `${user.firstName} ${user.lastName}`;
+  });
+
+  const columns = [
+    { title: 'Name', field: 'name' },
+    {
+      title: 'Owner',
+      field: 'owner',
+      render: (rowData) =>
+        rowData.owner ? (
+          <div>
+            {rowData.owner.firstName} {rowData.owner.lastName}
+          </div>
+        ) : (
+          '-'
+        ),
+      lookup: usersLookup,
+      initialEditValue: (rowData) => (rowData.owner ? rowData.owner._id : null),
+      filtering: authUser.role === 'admin',
+    },
+    {
+      title: 'Average Rate',
+      field: 'averageRate',
+      render: (rowData) => (
+        <Rating
+          name="averageRate"
+          defaultValue={rowData ? rowData.averageRate : 0}
+          value={rowData ? rowData.averageRate : 0}
+          precision={0.5}
+          readOnly
+          emptyIcon={<StarBorderIcon fontSize="inherit" />}
+        />
+      ),
+      editable: 'never',
+    },
+    {
+      title: 'Reviews Count',
+      field: 'reviewCount',
+      editable: 'never',
+    },
+  ];
+
+  const handleFilterChange = (filters) => {
+    const data = {};
+    filters.forEach((el) => {
+      data[el.column.field] = el.value;
+    });
+
+    setFilters(data);
   };
 
-  const addNewRestaurant = async (data) => {
-    try {
-      setIsLoading(true);
-      const data = await request('/restaurants', 'POST', data, true);
-      setList([...list, data]);
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(enqueueSnackbar(err.message, 'error'));
-    }
-  };
+  const handleOrderChange = (columnId, dir) => {
+    if (columnId < 0) return;
 
-  const updateRestaurant = async (newData, oldData) => {
-    try {
-      setIsLoading(true);
-      const data = await request(
-        `/restaurants/${oldData._id}`,
-        'PUT',
-        { ...oldData, ...newData },
-        true
-      );
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(enqueueSnackbar(err.message, 'error'));
-    }
+    setSorts([`${columns[columnId].field} ${dir}`]);
   };
-
-  const deleteRestaurant = async (oldData) => {
-    try {
-      setIsLoading(true);
-      const data = await request(
-        `/restaurants/${oldData._id}`,
-        'DELETE',
-        null,
-        true
-      );
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(enqueueSnackbar(err.message, 'error'));
-    }
-  };
-
-  useEffect(() => {
-    listRestaurants();
-  }, []);
 
   return (
     <MaterialTable
       columns={columns}
       data={list}
       title="Restaurants List"
+      isLoading={isLoading}
+      options={{
+        pageSize: perPage,
+        filtering: true,
+        search: false,
+        debounceInterval: 500,
+      }}
+      actions={[
+        {
+          icon: () => <VisibilityIcon />,
+          tooltip: 'View Details',
+          onClick: (event, rowData) => {
+            history.push(`/restaurants/${rowData._id}`);
+          },
+        },
+      ]}
+      onFilterChange={handleFilterChange}
+      onOrderChange={handleOrderChange}
+      components={{
+        Pagination: (props) => (
+          <TablePagination
+            {...props}
+            onChangePage={(e, page) => setPageNum(page)}
+            onChangeRowsPerPage={(e) => setPerPage(e.target.value)}
+            count={total}
+            page={pageNum}
+            rowsPerPage={perPage}
+          />
+        ),
+        Toolbar: (props) => {
+          return (
+            <Box display="flex">
+              <Typography variant="h5" component="h6">
+                Filter by average rate:
+              </Typography>
+              <Slider
+                min={0}
+                max={5}
+                step={0.1}
+                value={averageRateFilter}
+                onChange={(event, newValue) => {
+                  setAverageRateFilter(newValue);
+                }}
+                valueLabelDisplay="auto"
+                aria-labelledby="rate-range-slider"
+              />
+            </Box>
+          );
+        },
+      }}
       editable={{
-        onRowAdd: (newData) => {
-          addNewRestaurant(newData);
-        },
-        onRowUpdate: (newData, oldData) => {
-          updateRestaurant(newData, oldData);
-        },
-        onRowDelete: (oldData) => {
-          deleteRestaurant(oldData);
-        },
+        onRowAdd: addNewRestaurant,
+        onRowUpdate: updateRestaurant,
+        onRowDelete: deleteRestaurant,
       }}
     />
   );
