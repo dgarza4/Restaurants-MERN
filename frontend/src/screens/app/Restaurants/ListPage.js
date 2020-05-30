@@ -95,8 +95,14 @@ export default () => {
         <Select
           labelId="owner-select-label"
           id="owner-select"
-          value={props.value._id || Object.keys(ownersLookup)[0]}
-          onChange={props.onChange}
+          value={
+            typeof props.value === 'string'
+              ? props.value
+              : props.value
+              ? props.value._id
+              : null
+          }
+          onChange={(e) => props.onChange(e.target.value)}
         >
           {Object.keys(ownersLookup).map((ownerId) => (
             <MenuItem value={ownerId}>{ownersLookup[ownerId]}</MenuItem>
@@ -104,7 +110,6 @@ export default () => {
         </Select>
       ),
       initialEditValue: (rowData) => (rowData.owner ? rowData.owner._id : null),
-      // filtering: authUser.role === 'admin',
       filtering: false,
       sorting: false,
     },
