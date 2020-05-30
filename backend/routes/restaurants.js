@@ -15,6 +15,8 @@ router
   .put(restaurantCtrl.update)
   .delete(restaurantCtrl.remove);
 
+router.route('/:restaurantId/report').get(restaurantCtrl.report);
+
 router
   .route('/:restaurantId/reviews')
   .get(reviewCtrl.list)

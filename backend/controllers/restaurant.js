@@ -104,6 +104,22 @@ async function remove(req, res, next) {
   }
 }
 
+async function report(req, res, next) {
+  try {
+    const max = await Review.find({ restaurant: req.restaurant._id })
+      .sort([['rate', -1]])
+      .limit(1);
+
+    const min = await Review.find({ restaurant: req.restaurant._id })
+      .sort([['rate', 1]])
+      .limit(1);
+
+    res.json({ max, min });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getRestaurantByID(req, res, next, id) {
   try {
     const restaurant = await Restaurant.findById(id);
@@ -124,5 +140,6 @@ module.exports = {
   read,
   list,
   remove,
+  report,
   getRestaurantByID,
 };
