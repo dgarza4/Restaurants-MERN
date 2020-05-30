@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "cross-env NODE_ENV=test jest --coverage --testTimeout=10000"
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -17,14 +18,23 @@
     "helmet": "^3.22.0",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "jest-cli": "^26.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.15",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "supertest": "^4.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.2",
     "eslint": "^7.1.0",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   }
 }
