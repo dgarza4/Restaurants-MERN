@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { TablePagination, Slider, Grid, Typography } from '@material-ui/core';
+import {
+  TablePagination,
+  Slider,
+  Grid,
+  Typography,
+  Select,
+  MenuItem,
+} from '@material-ui/core';
 import Rating from '@material-ui/lab/Rating';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -15,46 +22,6 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
   },
 }));
-
-const getColumns = (authUser, usersLookup) => [
-  { title: 'Name', field: 'name' },
-  {
-    title: 'Owner',
-    field: 'owner',
-    render: (rowData) =>
-      rowData.owner ? (
-        <div>
-          {rowData.owner.firstName} {rowData.owner.lastName}
-        </div>
-      ) : (
-        '-'
-      ),
-    lookup: usersLookup,
-    initialEditValue: (rowData) => (rowData.owner ? rowData.owner._id : null),
-    filtering: authUser.role === 'admin',
-  },
-  {
-    title: 'Average Rate',
-    field: 'averageRate',
-    render: (rowData) => (
-      <Rating
-        name="averageRate"
-        defaultValue={rowData ? rowData.averageRate : 0}
-        value={rowData ? rowData.averageRate : 0}
-        precision={0.5}
-        readOnly
-        emptyIcon={<StarBorderIcon fontSize="inherit" />}
-      />
-    ),
-    editable: 'never',
-    filtering: false,
-  },
-  {
-    title: 'Reviews Count',
-    field: 'reviewCount',
-    editable: 'never',
-  },
-];
 
 const marks = [
   {
@@ -105,12 +72,74 @@ export default () => {
     averageRateFilter,
     setAverageRateFilter,
   } = useApiRequests();
-
-  const usersLookup = {};
+  const ownersLookup = {};
 
   usersList.forEach((user) => {
-    usersLookup[user._id] = `${user.firstName} ${user.lastName}`;
+    ownersLookup[user._id] = `${user.firstName} ${user.lastName}`;
   });
+
+  const columnsArray = [
+    { title: 'Name', field: 'name' },
+    {
+      title: 'Owner',
+      field: 'owner',
+      render: (rowData) =>
+        rowData.owner ? (
+          <div>
+            {rowData.owner.firstName} {rowData.owner.lastName}
+          </div>
+        ) : (
+          '-'
+        ),
+      lookup: ownersLookup,
+      editComponent: (props) => (
+        <Select
+          labelId="owner-select-label"
+          id="owner-select"
+          value={props.value._id || Object.keys(ownersLookup)[0]}
+          onChange={props.onChange}
+        >
+          {Object.keys(ownersLookup).map((ownerId) => (
+            <MenuItem value={ownerId}>{ownersLookup[ownerId]}</MenuItem>
+          ))}
+        </Select>
+      ),
+      initialEditValue: (rowData) => (rowData.owner ? rowData.owner._id : null),
+      filtering: authUser.role === 'admin',
+      sorting: false,
+    },
+    {
+      title: 'Average Rate',
+      field: 'averageRate',
+      render: (rowData) => (
+        <Rating
+          name="averageRate"
+          defaultValue={rowData ? rowData.averageRate : 0}
+          value={rowData ? rowData.averageRate : 0}
+          precision={0.5}
+          readOnly
+          emptyIcon={<StarBorderIcon fontSize="inherit" />}
+        />
+      ),
+      editable: 'never',
+      filtering: false,
+    },
+    {
+      title: 'Reviews Count',
+      field: 'reviewCount',
+      editable: 'never',
+    },
+  ];
+
+  if (authUser.role === 'owner') {
+    columnsArray.splice(1, 1);
+  }
+
+  const [columns, setColumns] = useState(columnsArray);
+
+  useEffect(() => {
+    setColumns(columnsArray);
+  }, [usersList, authUser]);
 
   const handleFilterChange = (filters) => {
     const data = {};
@@ -124,7 +153,7 @@ export default () => {
   const handleOrderChange = (columnId, dir) => {
     if (columnId < 0) return;
 
-    setSorts([`${getColumns(authUser, usersLookup)[columnId].field} ${dir}`]);
+    setSorts([`${columns[columnId].field} ${dir}`]);
   };
 
   const editable = {};
@@ -143,7 +172,7 @@ export default () => {
 
   return (
     <MaterialTable
-      columns={getColumns(authUser, usersLookup)}
+      columns={columns}
       data={list}
       title="Restaurants List"
       isLoading={isLoading}

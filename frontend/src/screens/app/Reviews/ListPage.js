@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   TablePagination,
@@ -9,7 +9,6 @@ import {
   DialogActions,
   DialogContent,
   Button,
-  TextField,
 } from '@material-ui/core';
 import ReplyIcon from '@material-ui/icons/Reply';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
@@ -18,7 +17,8 @@ import StarBorderIcon from '@material-ui/icons/StarBorder';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import MaterialTable, { MTableToolbar } from 'material-table';
-
+import { Formik, Form, Field } from 'formik';
+import { TextField } from 'formik-material-ui';
 import useApiRequests from './useApiRequests';
 
 const useStyles = makeStyles((theme) =>
@@ -32,46 +32,8 @@ const useStyles = makeStyles((theme) =>
 export default () => {
   const { authUser } = useSelector((state) => state.auth);
   const classes = useStyles();
-
-  const {
-    addNewReview,
-    updateReview,
-    deleteReview,
-    list,
-    total,
-    isLoading,
-    perPage,
-    setPerPage,
-    pageNum,
-    setPageNum,
-    setFilters,
-    setSorts,
-    restaurant,
-    reportData,
-  } = useApiRequests();
-
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const editable = {};
-
-  Object.assign(
-    editable,
-    authUser.role !== 'owner' && { onRowAdd: addNewReview },
-    authUser.role !== 'user' && { onRowUpdate: updateReview },
-    authUser.role === 'admin' && {
-      onRowDelete: deleteReview,
-    }
-  );
-
-  const columns = [
+  const [selected, setSelected] = useState(null);
+  const [columns, setColumns] = useState([
     {
       title: 'Visit Date',
       field: 'date',
@@ -94,7 +56,6 @@ export default () => {
       initialEditValue: new Date(),
       type: 'date',
       filtering: false,
-      editable: authUser.role !== 'owner',
     },
     {
       title: 'Rate',
@@ -123,12 +84,10 @@ export default () => {
       ),
       initialEditValue: 0,
       filtering: false,
-      editable: authUser.role !== 'owner',
     },
     {
       title: 'Comment',
       field: 'comment',
-      editable: authUser.role !== 'owner',
     },
     {
       title: 'Commented by',
@@ -141,14 +100,54 @@ export default () => {
         ) : (
           ''
         ),
-      editable: false,
+      editable: 'never',
+      filtering: false,
     },
     {
       title: 'Reply',
       field: 'reply',
-      editable: authUser.role === 'user' ? false : true,
+      editable: authUser.role === 'admin' ? 'always' : 'never',
     },
-  ];
+  ]);
+
+  const {
+    addNewReview,
+    updateReview,
+    deleteReview,
+    replyToComment,
+    list,
+    total,
+    isLoading,
+    perPage,
+    setPerPage,
+    pageNum,
+    setPageNum,
+    setFilters,
+    setSorts,
+    restaurant,
+    reportData,
+  } = useApiRequests();
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const editable = {};
+
+  Object.assign(
+    editable,
+    authUser.role !== 'owner' && { onRowAdd: addNewReview },
+    authUser.role === 'admin' && { onRowUpdate: updateReview },
+    authUser.role === 'admin' && {
+      onRowDelete: deleteReview,
+    }
+  );
 
   const handleFilterChange = (filters) => {
     const data = {};
@@ -165,42 +164,74 @@ export default () => {
     setSorts([`${columns[columnId].field} ${dir}`]);
   };
 
-  const actions = [
-    {
+  const actions = [];
+
+  if (authUser.role !== 'user') {
+    actions.push((rowData) => ({
       icon: () => <ReplyIcon />,
       tooltip: 'Reply to comment',
       onClick: (event, rowData) => {
         handleClickOpen();
+        setSelected(rowData._id);
       },
-    },
-  ];
+      disabled: !!rowData.reply,
+    }));
+  }
+
+  const handleFormSubmit = ({ reply }) => {
+    replyToComment(selected, reply);
+    handleClose();
+  };
 
   const renderModal = () => {
     return (
       <Dialog
         open={open}
         onClose={handleClose}
+        fullWidth
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id="form-dialog-title">Reply</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="reply"
-            label="Reply"
-            type="test"
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleClose} color="primary">
-            Reply
-          </Button>
-        </DialogActions>
+        <Formik
+          initialValues={{ reply: '' }}
+          validate={(values) => {
+            const errors = {};
+            if (!values.reply) {
+              errors.reply = 'Reply text can not be blank';
+            }
+
+            return errors;
+          }}
+          onSubmit={handleFormSubmit}
+        >
+          {({ submitForm, isSubmitting }) => (
+            <>
+              <DialogTitle id="form-dialog-title">Reply</DialogTitle>
+              <DialogContent>
+                <Form noValidate>
+                  <Field
+                    component={TextField}
+                    autoComplete="reply"
+                    name="reply"
+                    required
+                    fullWidth
+                    id="reply"
+                    label="reply"
+                    autoFocus
+                    disable={false}
+                  />
+                </Form>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="default">
+                  Cancel
+                </Button>
+                <Button onClick={submitForm} color="primary">
+                  Save
+                </Button>
+              </DialogActions>
+            </>
+          )}
+        </Formik>
       </Dialog>
     );
   };
@@ -255,41 +286,39 @@ export default () => {
                         name="rate"
                         defaultValue={restaurant.averageRate}
                         readOnly
-                        precision={0.01}
+                        precision={0.1}
                         emptyIcon={<StarBorderIcon fontSize="inherit" />}
                       />{' '}
                       / {restaurant.reviewCount}
                     </Box>
-                    {list.length > 1 && (
-                      <Box>
-                        {reportData.max && (
-                          <Box display="flex" alignItems="center">
-                            <Box width={140}>Highest rated review:</Box>
-                            <Rating
-                              name="rate"
-                              defaultValue={reportData.max.rate || 0}
-                              precision={0.1}
-                              readOnly
-                              emptyIcon={<StarBorderIcon fontSize="inherit" />}
-                            />
-                            <Box>({reportData.max.rate})</Box>
-                          </Box>
-                        )}
-                        {reportData.min && (
-                          <Box display="flex" alignItems="center">
-                            <Box width={140}>Lowest rated review:</Box>
-                            <Rating
-                              name="rate"
-                              defaultValue={reportData.min.rate || 0}
-                              precision={0.1}
-                              readOnly
-                              emptyIcon={<StarBorderIcon fontSize="inherit" />}
-                            />
-                            <Box>({reportData.min.rate})</Box>
-                          </Box>
-                        )}
-                      </Box>
-                    )}
+                    <Box>
+                      {reportData.max && (
+                        <Box display="flex" alignItems="center">
+                          <Box width={140}>Highest rated review:</Box>
+                          <Rating
+                            name="rate"
+                            defaultValue={reportData.max.rate || 0}
+                            precision={0.1}
+                            readOnly
+                            emptyIcon={<StarBorderIcon fontSize="inherit" />}
+                          />
+                          <Box>({reportData.max.rate})</Box>
+                        </Box>
+                      )}
+                      {reportData.min && (
+                        <Box display="flex" alignItems="center">
+                          <Box width={140}>Lowest rated review:</Box>
+                          <Rating
+                            name="rate"
+                            defaultValue={reportData.min.rate || 0}
+                            precision={0.1}
+                            readOnly
+                            emptyIcon={<StarBorderIcon fontSize="inherit" />}
+                          />
+                          <Box>({reportData.min.rate})</Box>
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 )}
               </div>

@@ -32,7 +32,7 @@ export default () => {
         name: { $regex: filters.name, $options: 'i' },
       },
       newFilters.owner && {
-        owner: filters.owner,
+        owner: { $in: filters.owner },
       },
       newFilters.reviewCount && { reviewCount: filters.reviewCount }
     );

@@ -58,10 +58,10 @@ export default () => {
     const filtersData = {};
     Object.assign(
       filtersData,
-      newFilters.date && { date: filters.date },
-      newFilters.rate && { rate: filters.rate },
-      newFilters.comment && { comment: filters.comment },
-      newFilters.reply && { reply: filters.reply }
+      newFilters.comment && {
+        comment: { $regex: filters.comment, $options: 'i' },
+      },
+      newFilters.reply && { reply: { $regex: filters.reply, $options: 'i' } }
     );
 
     const requestData = {
@@ -145,6 +145,24 @@ export default () => {
     });
   };
 
+  const replyToComment = async (reviewId, reply) => {
+    try {
+      await request(
+        `/restaurants/${restaurantId}/reviews/${reviewId}`,
+        'PUT',
+        { reply },
+        true
+      );
+      setList(
+        list.map((review) =>
+          review._id === reviewId ? { ...review, reply } : review
+        )
+      );
+    } catch (err) {
+      dispatch(enqueueSnackbar(err.message, 'error'));
+    }
+  };
+
   useEffect(() => {
     listReviews(pageNum, perPage, filters, sorts);
   }, [perPage, pageNum, filters, sorts]);
@@ -159,7 +177,7 @@ export default () => {
     addNewReview,
     updateReview,
     deleteReview,
-
+    replyToComment,
     list,
     total,
     isLoading,

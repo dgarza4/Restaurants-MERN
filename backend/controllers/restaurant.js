@@ -34,7 +34,10 @@ async function update(req, res, next) {
   if (req.user.role === ROLES.ADMIN) {
     try {
       const updatedRestaurant = await req.restaurant.save();
-      res.json(updatedRestaurant);
+      const populated = await Restaurant.findById(
+        updatedRestaurant._id
+      ).populate('owner');
+      res.json(populated);
     } catch (err) {
       next(err);
     }
