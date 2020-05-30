@@ -33,7 +33,7 @@ export default () => {
   const { authUser } = useSelector((state) => state.auth);
   const classes = useStyles();
   const [selected, setSelected] = useState(null);
-  const [columns, setColumns] = useState([
+  const [columns] = useState([
     {
       title: 'Visit Date',
       field: 'date',

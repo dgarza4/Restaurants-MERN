@@ -165,11 +165,13 @@ export default () => {
 
   useEffect(() => {
     listReviews(pageNum, perPage, filters, sorts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage, pageNum, filters, sorts]);
 
   useEffect(() => {
     readRestaurant(restaurantId);
     getReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
 
   return {

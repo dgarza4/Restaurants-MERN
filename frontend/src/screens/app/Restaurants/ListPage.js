@@ -79,7 +79,6 @@ export default () => {
   });
 
   const columnsArray = [
-    { title: 'Name', field: 'name' },
     {
       title: 'Owner',
       field: 'owner',
@@ -105,7 +104,8 @@ export default () => {
         </Select>
       ),
       initialEditValue: (rowData) => (rowData.owner ? rowData.owner._id : null),
-      filtering: authUser.role === 'admin',
+      // filtering: authUser.role === 'admin',
+      filtering: false,
       sorting: false,
     },
     {
@@ -124,6 +124,7 @@ export default () => {
       editable: 'never',
       filtering: false,
     },
+    { title: 'Name', field: 'name' },
     {
       title: 'Reviews Count',
       field: 'reviewCount',
@@ -139,6 +140,7 @@ export default () => {
 
   useEffect(() => {
     setColumns(columnsArray);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usersList, authUser]);
 
   const handleFilterChange = (filters) => {

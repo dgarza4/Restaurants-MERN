@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default () => {
   const classes = useStyles();
-  const { authUser, authUserLoading } = useSelector((state) => state.auth);
+  const { authUser } = useSelector((state) => state.auth);
 
   return (
     <div className={classes.paper}>

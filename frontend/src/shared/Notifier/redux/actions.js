@@ -20,7 +20,7 @@ export const enqueueSnackbar = (message, variant) => {
     options: {
       key: new Date().getTime() + Math.random(),
       variant,
-      autoHideDuration: 3000,
+      autoHideDuration: 5000,
       // action: (key) => (
       //   <Button onClick={() => closeSnackbar(key)}>dismiss</Button>
       // ),

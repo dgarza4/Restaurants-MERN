@@ -124,12 +124,14 @@ export default () => {
 
   useEffect(() => {
     listRestaurants(pageNum, perPage, filters, sorts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage, pageNum, filters, sorts, averageRateFilter]);
 
   useEffect(() => {
     if (authUser.role === 'admin') {
       listUsers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
