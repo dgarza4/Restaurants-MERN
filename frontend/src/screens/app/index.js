@@ -12,6 +12,7 @@ import ReviewsList from './Reviews/ListPage';
 const useStyles = makeStyles((theme) => ({
   paper: {
     marginTop: theme.spacing(5),
+    marginBottom: theme.spacing(5),
   },
 }));
 

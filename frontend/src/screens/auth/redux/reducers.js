@@ -44,20 +44,10 @@ export default (state = initialState, action) => {
         authUserLoading: false,
       };
 
-    case CONSTANTS.UPDATE_PROFILE_REQUEST:
-      return {
-        ...state,
-        authUserLoading: true,
-      };
     case CONSTANTS.UPDATE_PROFILE_SUCCESS:
       return {
         ...state,
         authUser: action.payload,
-        authUserLoading: false,
-      };
-    case CONSTANTS.UPDATE_PROFILE_ERROR:
-      return {
-        ...state,
         authUserLoading: false,
       };
 

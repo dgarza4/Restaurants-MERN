@@ -31,14 +31,7 @@ export const logout = () => ({
   type: CONSTANTS.LOGOUT,
 });
 
-export const updateProfileRequest = (payload) => ({
-  type: CONSTANTS.UPDATE_PROFILE_REQUEST,
-  payload,
-});
 export const updateProfileSuccess = (payload) => ({
   type: CONSTANTS.UPDATE_PROFILE_SUCCESS,
   payload,
-});
-export const updateProfileError = () => ({
-  type: CONSTANTS.UPDATE_PROFILE_ERROR,
 });

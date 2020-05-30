@@ -35,20 +35,7 @@ function* login(action) {
   }
 }
 
-function* updateProfile(action) {
-  try {
-    const data = yield call(request, '/profile', 'PUT', action.payload, true);
-
-    history.push('/');
-    yield put(ACTIONS.updateProfileSuccess(data));
-  } catch (err) {
-    yield put(ACTIONS.updateProfileError());
-    yield put(enqueueSnackbar(err.message, 'error'));
-  }
-}
-
 export default function* authSaga() {
   yield takeLatest(CONSTANTS.SIGNUP_REQUEST, signup);
   yield takeLatest(CONSTANTS.LOGIN_REQUEST, login);
-  yield takeLatest(CONSTANTS.UPDATE_PROFILE_REQUEST, updateProfile);
 }
