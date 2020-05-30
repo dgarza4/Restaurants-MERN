@@ -114,7 +114,7 @@ async function report(req, res, next) {
       .sort([['rate', 1]])
       .limit(1);
 
-    res.json({ max, min });
+    res.json({ max: max[0], min: min[0] });
   } catch (err) {
     next(err);
   }

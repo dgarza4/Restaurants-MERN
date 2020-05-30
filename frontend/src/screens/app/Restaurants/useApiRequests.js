@@ -14,6 +14,7 @@ export default () => {
   const [filters, setFilters] = useState({});
   const [sorts, setSorts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [averageRateFilter, setAverageRateFilter] = useState([0, 5]);
 
   const listRestaurants = async (
     page = pageNum,
@@ -21,7 +22,10 @@ export default () => {
     newFilters = filters,
     newSorts = sorts
   ) => {
-    const filtersData = {};
+    const filtersData = {
+      averageRate: { $gte: averageRateFilter[0], $lte: averageRateFilter[1] },
+    };
+
     Object.assign(
       filtersData,
       newFilters.name && {
@@ -30,7 +34,6 @@ export default () => {
       newFilters.owner && {
         owner: filters.owner,
       },
-      newFilters.averageRate && { averageRate: filters.averageRate },
       newFilters.reviewCount && { reviewCount: filters.reviewCount }
     );
 
@@ -121,7 +124,7 @@ export default () => {
 
   useEffect(() => {
     listRestaurants(pageNum, perPage, filters, sorts);
-  }, [perPage, pageNum, filters, sorts]);
+  }, [perPage, pageNum, filters, sorts, averageRateFilter]);
 
   useEffect(() => {
     if (authUser.role === 'admin') {
@@ -150,5 +153,8 @@ export default () => {
     setFilters,
 
     setSorts,
+
+    averageRateFilter,
+    setAverageRateFilter,
   };
 };

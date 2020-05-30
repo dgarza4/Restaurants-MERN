@@ -15,6 +15,7 @@ export default () => {
   const [sorts, setSorts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [restaurant, setRestaurant] = useState({});
+  const [reportData, setReportData] = useState({});
 
   const readRestaurant = async () => {
     setIsLoading(true);
@@ -26,6 +27,22 @@ export default () => {
         true
       );
       setRestaurant(data);
+    } catch (err) {
+      dispatch(enqueueSnackbar(err.message, 'error'));
+    }
+    setIsLoading(false);
+  };
+
+  const getReport = async () => {
+    setIsLoading(true);
+    try {
+      const data = await request(
+        `/restaurants/${restaurantId}/report`,
+        'GET',
+        null,
+        true
+      );
+      setReportData(data);
     } catch (err) {
       dispatch(enqueueSnackbar(err.message, 'error'));
     }
@@ -134,6 +151,7 @@ export default () => {
 
   useEffect(() => {
     readRestaurant(restaurantId);
+    getReport();
   }, [restaurantId]);
 
   return {
@@ -158,5 +176,6 @@ export default () => {
     setSorts,
 
     restaurant,
+    reportData,
   };
 };
