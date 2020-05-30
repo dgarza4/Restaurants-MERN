@@ -103,10 +103,19 @@ export default function NavBar() {
                     open={open}
                     onClose={handleClose}
                   >
-                    <MenuItem component={Link} to="/profile">
+                    <MenuItem
+                      component={Link}
+                      to="/profile"
+                      onClick={handleClose}
+                    >
                       Profile
                     </MenuItem>
-                    <MenuItem onClick={() => dispatch(logout())}>
+                    <MenuItem
+                      onClick={() => {
+                        dispatch(logout());
+                        handleClose();
+                      }}
+                    >
                       Logout
                     </MenuItem>
                   </Menu>
