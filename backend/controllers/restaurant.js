@@ -21,6 +21,10 @@ async function create(req, res, next) {
   restaurant.owner =
     req.user.role === ROLES.OWNER ? req.user._id : req.body.owner;
 
+  if (!restaurant.owner) {
+    return next(new APIError('Owner can not be empty', 422));
+  }
+
   try {
     const newRestaurant = await restaurant.save();
     res.json(newRestaurant);

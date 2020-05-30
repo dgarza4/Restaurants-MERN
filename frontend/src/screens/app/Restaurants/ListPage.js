@@ -138,7 +138,7 @@ export default () => {
   ];
 
   if (authUser.role === 'owner') {
-    columnsArray.splice(1, 1);
+    columnsArray.splice(0, 1);
   }
 
   const [columns, setColumns] = useState(columnsArray);
