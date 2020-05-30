@@ -174,6 +174,11 @@ export default () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
 
+  useEffect(() => {
+    getReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list]);
+
   return {
     listReviews,
     addNewReview,
