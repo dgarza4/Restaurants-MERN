@@ -9,6 +9,15 @@ async function create(req, res, next) {
   review.restaurant = req.restaurant._id;
   review.user = req.user._id;
 
+  if (req.restaurant.owner == req.user._id) {
+    return next(
+      new APIError(
+        'You are not allowed to leave a review for your restaurant',
+        403
+      )
+    );
+  }
+
   if (
     await Review.findOne({ user: req.user._id, restaurant: req.restaurant._id })
   ) {

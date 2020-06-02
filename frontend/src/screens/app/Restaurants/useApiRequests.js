@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import request from '../../../utils/apiRequest';
 import { enqueueSnackbar } from '../../../shared/Notifier/redux/actions';
 
+import useDebounce from '../../../shared/useDebounce';
+
 export default () => {
   const dispatch = useDispatch();
   const { authUser } = useSelector((state) => state.auth);
@@ -12,9 +14,11 @@ export default () => {
   const [pageNum, setPageNum] = useState(0);
   const [perPage, setPerPage] = useState(10);
   const [filters, setFilters] = useState({});
-  const [sorts, setSorts] = useState([]);
+  const [sorts, setSorts] = useState(['averageRate -1']);
   const [isLoading, setIsLoading] = useState(false);
   const [averageRateFilter, setAverageRateFilter] = useState([0, 5]);
+
+  const debouncedRateFilter = useDebounce(averageRateFilter, 500);
 
   const listRestaurants = async (
     page = pageNum,
@@ -23,7 +27,10 @@ export default () => {
     newSorts = sorts
   ) => {
     const filtersData = {
-      averageRate: { $gte: averageRateFilter[0], $lte: averageRateFilter[1] },
+      averageRate: {
+        $gte: debouncedRateFilter[0],
+        $lte: debouncedRateFilter[1],
+      },
     };
 
     Object.assign(
@@ -125,7 +132,7 @@ export default () => {
   useEffect(() => {
     listRestaurants(pageNum, perPage, filters, sorts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perPage, pageNum, filters, sorts, averageRateFilter]);
+  }, [perPage, pageNum, filters, sorts, debouncedRateFilter]);
 
   useEffect(() => {
     if (authUser.role === 'admin') {

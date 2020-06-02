@@ -10,9 +10,9 @@ import { enqueueSnackbar } from '../../../shared/Notifier/redux/actions';
 
 function* signup(action) {
   try {
-    const data = yield call(request, '/auth/signup', 'POST', action.payload);
+    yield call(request, '/auth/signup', 'POST', action.payload);
 
-    yield put(ACTIONS.signupSuccess(data));
+    yield put(ACTIONS.signupSuccess());
     history.push('/signin');
   } catch (err) {
     yield put(ACTIONS.signupError());

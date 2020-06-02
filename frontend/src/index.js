@@ -12,18 +12,16 @@ import * as serviceWorker from './serviceWorker';
 import theme from './theme';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <Router history={history}>
-            <Screens />
-          </Router>
-        </PersistGate>
-      </Provider>
-    </ThemeProvider>
-  </React.StrictMode>,
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <Router history={history}>
+          <Screens />
+        </Router>
+      </PersistGate>
+    </Provider>
+  </ThemeProvider>,
   document.getElementById('root')
 );
 

@@ -36,6 +36,17 @@ async function update(req, res, next) {
   }
 }
 
+async function close(req, res, next) {
+  try {
+    const oldProfile = await User.findById(req.user._id);
+    await oldProfile.remove();
+    res.status(200).json(oldProfile);
+  } catch (err) {
+    return next(new APIError(err.message, 500));
+  }
+}
+
 module.exports = {
   update,
+  close,
 };

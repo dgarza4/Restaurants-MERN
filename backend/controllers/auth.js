@@ -21,7 +21,7 @@ async function login(req, res, next) {
   try {
     await user.authenticate(req.body.password);
   } catch (err) {
-    return next(new APIError('Incorrect password', 422));
+    return next(new APIError('Incorrect password', 403));
   }
 
   const token = jwt.sign(
@@ -60,7 +60,7 @@ async function signup(req, res, next) {
 
   try {
     const newUser = await user.save();
-    res.json(newUser);
+    res.status(201).json(newUser);
   } catch (err) {
     return next(new APIError(err.message, 500));
   }

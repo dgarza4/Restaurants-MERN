@@ -113,6 +113,7 @@ export default () => {
       filtering: false,
       sorting: false,
     },
+    { title: 'Name', field: 'name' },
     {
       title: 'Average Rate',
       field: 'averageRate',
@@ -129,7 +130,6 @@ export default () => {
       editable: 'never',
       filtering: false,
     },
-    { title: 'Name', field: 'name' },
     {
       title: 'Reviews Count',
       field: 'reviewCount',

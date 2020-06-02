@@ -284,7 +284,11 @@ export default () => {
                       className={classes.customToolbar}
                     >
                       <Typography variant="h5" component="h6">
-                        Average rate ({restaurant.averageRate}):
+                        Average rate (
+                        {restaurant.averageRate
+                          ? restaurant.averageRate.toFixed(2)
+                          : 0}
+                        ):
                       </Typography>
                       <Rating
                         name="rate"

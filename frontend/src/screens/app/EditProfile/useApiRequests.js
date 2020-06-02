@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import request from '../../../utils/apiRequest';
 import { enqueueSnackbar } from '../../../shared/Notifier/redux/actions';
 
-import { updateProfileSuccess } from '../../auth/redux/actions';
+import { updateProfileSuccess, logout } from '../../auth/redux/actions';
 
 export default () => {
   const dispatch = useDispatch();
@@ -30,9 +30,22 @@ export default () => {
     setIsLoading(false);
   };
 
+  const closeAccount = async () => {
+    setIsLoading(true);
+    try {
+      await request('/profile', 'DELETE', null, true);
+      dispatch(logout());
+      dispatch(enqueueSnackbar('Successfully closed', 'success'));
+    } catch (err) {
+      dispatch(enqueueSnackbar(err.message, 'error'));
+    }
+    setIsLoading(false);
+  };
+
   return {
     data,
     isLoading,
     updateProfile,
+    closeAccount,
   };
 };

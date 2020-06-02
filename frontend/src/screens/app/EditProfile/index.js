@@ -12,6 +12,11 @@ import {
   Grid,
   Typography,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@material-ui/core';
 
 import useApiRequests from './useApiRequests';
@@ -38,10 +43,59 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignUp() {
   const classes = useStyles();
-  const { data, isLoading, updateProfile } = useApiRequests();
+  const { data, isLoading, updateProfile, closeAccount } = useApiRequests();
 
   const handleFormSubmit = ({ firstName, lastName, email, password }) => {
     updateProfile({ firstName, lastName, email, password });
+  };
+
+  const [open, setOpen] = React.useState(false);
+
+  // const handleClickOpen = () => {
+  //   setOpen(true);
+  // };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleAccountClose = () => {
+    setOpen(true);
+  };
+
+  const handleConfirmClose = () => {
+    closeAccount();
+    setOpen(false);
+  };
+
+  const renderModal = () => {
+    return (
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Close your account</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure to close your account?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleConfirmClose}
+            color="primary"
+            disabled={isLoading}
+          >
+            Yes
+          </Button>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   return (
@@ -160,7 +214,27 @@ export default function SignUp() {
               </Grid>
             </Grid>
             <Grid container spacing={3} className={classes.submit}>
-              <Grid item xs={6}>
+              <Grid item xs={4}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  component={Link}
+                  to="/restaurants"
+                >
+                  Cancel
+                </Button>
+              </Grid>
+              <Grid item xs={4}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleAccountClose}
+                >
+                  Close
+                </Button>
+              </Grid>
+              <Grid item xs={4}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -171,20 +245,11 @@ export default function SignUp() {
                   {isLoading ? 'Saving...' : 'Save'}
                 </Button>
               </Grid>
-              <Grid item xs={6}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  component={Link}
-                  to="/restaurants"
-                >
-                  Cancel
-                </Button>
-              </Grid>
             </Grid>
           </Form>
         )}
       </Formik>
+      {renderModal()}
     </Container>
   );
 }

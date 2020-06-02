@@ -1,5 +1,5 @@
 import React from 'react';
-import { TablePagination } from '@material-ui/core';
+import { TablePagination, TextField } from '@material-ui/core';
 import MaterialTable from 'material-table';
 
 import useApiRequests from './useApiRequests';
@@ -12,6 +12,17 @@ const columns = [
     title: 'Password',
     field: 'password',
     render: (rowData) => <div style={{ opacity: 0.5 }}>******</div>,
+    editComponent: (props) => (
+      <TextField
+        type="password"
+        name="password"
+        value={props.value}
+        onChange={(e) => {
+          e.preventDefault();
+          props.onChange(e.target.value);
+        }}
+      />
+    ),
     filtering: false,
   },
   {

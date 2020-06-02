@@ -49,6 +49,12 @@ userSchema.methods.authenticate = function authenticate(password) {
   });
 };
 
+userSchema.methods.toJSON = function () {
+  var obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
+
 userSchema.pre('save', function preSave(next) {
   if (this.password && this.isModified('password')) {
     this.password = this.hashPassword(this.password)
