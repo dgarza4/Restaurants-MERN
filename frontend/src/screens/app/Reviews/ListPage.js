@@ -256,11 +256,15 @@ export default () => {
           Pagination: (props) => (
             <TablePagination
               {...props}
-              onChangePage={(e, page) => setPageNum(page)}
-              onChangeRowsPerPage={(e) => setPerPage(e.target.value)}
+              rowsPerPageOptions={[5, 10, 20]}
+              rowsPerPage={perPage}
               count={total}
               page={pageNum}
-              rowsPerPage={perPage}
+              onChangePage={(e, page) => setPageNum(page)}
+              onChangeRowsPerPage={(event) => {
+                props.onChangeRowsPerPage(event);
+                setPerPage(event.target.value);
+              }}
             />
           ),
           Toolbar: (props) => {
